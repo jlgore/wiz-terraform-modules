@@ -81,6 +81,8 @@ jobs:
           for dir in \
             modules/account-project-factory \
             modules/automation-rule \
+            modules/cicd-scan-policy \
+            modules/ignore-rule \
             modules/resolvers/wiz-graph; do
             echo "::group::validate $dir"
             terraform -chdir="$dir" init -backend=false -input=false

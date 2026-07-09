@@ -48,6 +48,8 @@ you can apply to problems of your own in the platform.
 | [`resolvers/wiz-graph`](modules/resolvers/wiz-graph) | Derives `owner_map` from the **Wiz Security Graph** (`graphql_query`). Single-provider — no cloud creds. |
 | [`resolvers/cloud-tags`](modules/resolvers/cloud-tags) | Derives `owner_map` from **cloud provider tags** (AWS/Azure data blocks). Pure transformer. |
 | [`automation-rule`](modules/automation-rule) | Wraps `wiz-v2_automation_rule`; typed presets for Slack/Jira/ServiceNow/webhook/email/SNS/Google Chat, hides the `jsonencode` footguns. |
+| [`ignore-rule`](modules/ignore-rule) | Wraps `wiz-v2_ignore_rule`; auto-satisfies the ≥2-condition rule, presets ignore-vs-**downgrade**, bundles the 11 rule-ID scopes. |
+| [`cicd-scan-policy`](modules/cicd-scan-policy) | Wraps `wiz-v2_cicd_scan_policy`; typed **gate** presets (vulns/secrets/IaC) over the 8-way `params` union, one-line per-lifecycle enforcement. |
 
 The two `resolvers/*` modules are interchangeable — both output the same
 `owner_map` contract, so you can swap owner-derivation strategy without touching
