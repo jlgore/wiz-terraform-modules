@@ -55,18 +55,19 @@ resource "wiz-v2_project" "this" {
     environment   = each.value.environment
   }]
 
-  dynamic "risk_profile" {
-    for_each = local.risk_profile == null ? [] : [local.risk_profile]
-    content {
-      business_impact      = risk_profile.value.business_impact
-      has_authentication   = try(risk_profile.value.has_authentication, null)
-      has_exposed_api      = try(risk_profile.value.has_exposed_api, null)
-      is_customer_facing   = try(risk_profile.value.is_customer_facing, null)
-      is_internet_facing   = try(risk_profile.value.is_internet_facing, null)
-      is_regulated         = try(risk_profile.value.is_regulated, null)
-      regulatory_standards = try(risk_profile.value.regulatory_standards, null)
-      sensitive_data_types = try(risk_profile.value.sensitive_data_types, null)
-      stores_data          = try(risk_profile.value.stores_data, null)
-    }
+  # risk_profile is a nested-object ATTRIBUTE (not a block) in the provider, and
+  # every field is a string. Build one complete object so the shape is uniform
+  # whether it came from a partial preset or the override; try() fills the gaps.
+  risk_profile = local.risk_profile == null ? null : {
+    business_impact       = try(local.risk_profile.business_impact, null)
+    has_authentication    = try(local.risk_profile.has_authentication, null)
+    has_exposed_api       = try(local.risk_profile.has_exposed_api, null)
+    is_actively_developed = try(local.risk_profile.is_actively_developed, null)
+    is_customer_facing    = try(local.risk_profile.is_customer_facing, null)
+    is_internet_facing    = try(local.risk_profile.is_internet_facing, null)
+    is_regulated          = try(local.risk_profile.is_regulated, null)
+    regulatory_standards  = try(local.risk_profile.regulatory_standards, null)
+    sensitive_data_types  = try(local.risk_profile.sensitive_data_types, null)
+    stores_data           = try(local.risk_profile.stores_data, null)
   }
 }

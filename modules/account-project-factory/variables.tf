@@ -97,17 +97,16 @@ variable "risk_profile_preset" {
 variable "risk_profile_override" {
   description = "Full risk_profile object. When set, bypasses the preset entirely (escape hatch)."
   type = object({
-    business_impact        = optional(string)
-    has_authentication     = optional(string)
-    has_exposed_api        = optional(string)
-    is_actively_developed  = optional(string)
-    is_customer_facing     = optional(string)
-    is_internet_facing     = optional(string)
-    is_regulated           = optional(string)
-    is_regulated_standards = optional(list(string))
-    regulatory_standards   = optional(list(string))
-    sensitive_data_types   = optional(list(string))
-    stores_data            = optional(string)
+    business_impact       = optional(string)
+    has_authentication    = optional(string)
+    has_exposed_api       = optional(string)
+    is_actively_developed = optional(string)
+    is_customer_facing    = optional(string)
+    is_internet_facing    = optional(string)
+    is_regulated          = optional(string)
+    regulatory_standards  = optional(list(string))
+    sensitive_data_types  = optional(list(string))
+    stores_data           = optional(string)
   })
   default = null
 }
