@@ -1,24 +1,32 @@
 # Wiz Terraform Modules
 
 Opinionated, composable Terraform modules for the **Wiz v2 provider** — built to
-smooth the platform's sharpest edges so you can express intent, not boilerplate.
+smooth some sharp edges I have discovered after working in the platform for a few years.
 
 > **Provider status:** the Wiz v2 provider is in **preview** (local name
 > `wiz-v2`, to be renamed `wizsec` on release). These modules pin the provider
 > `source` to a neutral placeholder (`wizsec/wiz-v2`); set it to whatever
 > registry you pull the provider from, and keep it identical across the root
-> config and every module.
+> config and every module. I don't want a letter from Wiz or Google. If you're a
+> Wiz customer, the documentation provides the correct registry URL and current
+> versions.
 
 ## The idea
 
-The provider faithfully exposes Wiz's API — which means it also exposes its rough
+The `v2` provider exposes Wiz's API which means it also exposes its rough
 spots: fields that must be hand-`jsonencode()`d, an action type with ~50
 differently-shaped parameter blocks, and a lot of ceremony to stand up projects.
 These modules encode the *correct* patterns once, so callers can't hold them
-wrong. Every module ships **opinionated presets with a full escape hatch** — easy
-by default, never boxed in.
+wrong. Every module ships **opinionated presets with a full escape hatch** so you can modify them to your needs.
 
-The flagship pattern: **your project graph builds itself from cloud data.**
+**Your project graph builds itself from cloud data.** The modules look up
+resources like `data.wiz-v2_cloud_accounts` or `data.wiz-v2_cloud_organizations`
+and pass their `external_id` to a `wiz-graph` Terraform module, so you can
+iterate on how you build projects. The examples show one pattern: a wiz-graph
+query pulls in info from an external ID, then reads an owner tag off the cloud
+platform's native tag fields and creates a project with that owner's email as its
+security champion. But the goal is for these modules to be composable examples
+you can apply to problems of your own in the platform.
 
 ```
  wiz-v2_cloud_accounts        resolvers/wiz-graph  (or cloud-tags)
