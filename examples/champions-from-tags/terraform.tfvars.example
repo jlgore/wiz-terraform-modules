@@ -1,0 +1,17 @@
+# Copy to terraform.tfvars and adjust to your tenant. All values are examples.
+
+cloud_providers = ["Azure"]
+
+# The tag your org stamps owner emails with (case-insensitive). This is the
+# single most important knob — without it, nobody becomes a champion.
+owner_tag_keys = ["team_owner"]
+
+# Optional: only promote emails in these domains to champions.
+email_domain_allowlist = ["example.com"]
+
+# Name projects after the subscription. Tokens ($name/$env) are escaped as $$
+# so Terraform passes them through literally to the module.
+project_name_template = "$${name}"
+
+risk_profile_preset = "internal"
+business_unit       = "Platform Engineering"

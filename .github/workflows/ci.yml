@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fmt:
+    name: terraform fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+      - name: Check formatting
+        run: terraform fmt -check -recursive -diff
+
+  validate:
+    name: terraform validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+
+      # Always runnable: modules with no provider dependency.
+      - name: Validate provider-free modules
+        run: |
+          set -euo pipefail
+          for dir in modules/resolvers/cloud-tags; do
+            echo "::group::validate $dir"
+            terraform -chdir="$dir" init -backend=false -input=false
+            terraform -chdir="$dir" validate
+            echo "::endgroup::"
+          done
+
+      # Full validation of the provider-dependent modules. The committed code
+      # pins a neutral placeholder source (`wizsec/wiz-v2`); here we inject the
+      # real registry source at runtime so it isn't hardcoded in the repo.
+      # Runs only when the repo variable WIZ_PROVIDER_SOURCE is set, so forks /
+      # PRs without it are not failed.
+      #
+      # Configure in repo settings:
+      #   - Variable  WIZ_PROVIDER_SOURCE  e.g. <registry-host>/wizsec/wiz-v2
+      #   - Secret    WIZ_REGISTRY_TOKEN   OPTIONAL — only if the registry ever
+      #               requires auth. The public preview registry does not, so
+      #               you can leave it unset.
+      - name: Validate provider-dependent modules
+        if: ${{ vars.WIZ_PROVIDER_SOURCE != '' }}
+        env:
+          WIZ_PROVIDER_SOURCE: ${{ vars.WIZ_PROVIDER_SOURCE }}
+          WIZ_REGISTRY_TOKEN: ${{ secrets.WIZ_REGISTRY_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Authenticate to the registry via Terraform's native per-host token
+          # env var (TF_TOKEN_<host>, dots->_, dashes->__). Never printed.
+          host="${WIZ_PROVIDER_SOURCE%%/*}"
+          if [ -n "${WIZ_REGISTRY_TOKEN:-}" ]; then
+            echo "::add-mask::${WIZ_REGISTRY_TOKEN}"
+            tokvar="TF_TOKEN_$(printf '%s' "$host" | sed 's/-/__/g; s/\./_/g')"
+            export "${tokvar}=${WIZ_REGISTRY_TOKEN}"
+          fi
+
+          # Inject the real source into the ephemeral checkout only, and drop the
+          # placeholder version constraint (the preview version may not satisfy it).
+          grep -rlZ 'wizsec/wiz-v2' --include='*.tf' . | xargs -0 sed -i \
+            -e "s#\"wizsec/wiz-v2\"#\"${WIZ_PROVIDER_SOURCE}\"#g" \
+            -e '/version = ">= 0.1"/d'
+
+          for dir in \
+            modules/account-project-factory \
+            modules/automation-rule \
+            modules/resolvers/wiz-graph; do
+            echo "::group::validate $dir"
+            terraform -chdir="$dir" init -backend=false -input=false
+            terraform -chdir="$dir" validate
+            echo "::endgroup::"
+          done
+
+  tflint:
+    name: tflint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+      - name: Init tflint plugins
+        run: tflint --init
+      - name: Lint
+        run: tflint --recursive --minimum-failure-severity=error

@@ -1,0 +1,30 @@
+# Terraform state — CAN CONTAIN REAL TENANT DATA (account IDs, emails, tags).
+# Never commit these.
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Provider plugins, lock files, and CLI working dirs
+.terraform/
+.terraform.lock.hcl
+crash.log
+crash.*.log
+
+# Local variable files — may hold environment-specific values/secrets.
+# The tracked template is terraform.tfvars.example.
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+
+# Plans (binary, may embed sensitive values)
+*.tfplan
+tfplan
+
+# Wiz provider reference docs — copied upstream content, kept locally as
+# working reference only. Never commit these. (Authored README.md files are
+# intentionally NOT matched by this pattern.)
+wiz-v2-*.md
+
+# Editor/OS noise
+.DS_Store
+*.swp
