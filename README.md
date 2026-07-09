@@ -120,6 +120,12 @@ credentials.
 [`.gitignore`](.gitignore) blocks `*.tfstate*`, `.terraform/`, and `*.tfvars`
 (the tracked template is `*.tfvars.example`). Never commit state.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) — module conventions, the offline
+schema-validation workflow, and the hard rule against committing anything
+tenant-specific.
+
 ## License
 
 [MIT](LICENSE).
